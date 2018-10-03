@@ -1,0 +1,9 @@
+*~
+lib/*.ts
+!lib/*.d.ts
+test/
+node_modules/
+.gitignore
+.npmignore
+yarn.lock
+*.tgz
