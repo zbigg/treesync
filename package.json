@@ -1,6 +1,6 @@
 {
   "name": "@zbigg/treesync",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Synchronize whole object trees just like JSON.",
   "keywords": [
     "javascript",
