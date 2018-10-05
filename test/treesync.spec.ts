@@ -1,10 +1,10 @@
 import { assert } from "chai";
-import { serialize, deserialize, Synchronizer, SerializationContext } from "../lib/treesync";
+import { buildMessage, decodeMessage, Synchronizer, SerializationContext } from "../lib/treesync";
 
 function transfer<T>(value: T, context?: SerializationContext): T {
-    const payload = JSON.stringify(serialize(value, context));
+    const payload = JSON.stringify(buildMessage(value, context));
     //    console.log('T', payload);
-    return deserialize(JSON.parse(payload), context);
+    return decodeMessage(JSON.parse(payload), context);
 }
 
 function assertTransferWorks<T>(value: T): void {
@@ -141,8 +141,8 @@ describe("treesync", function() {
                 } catch(e) {
                     error = e;
                 }
-                const P = serialize(error);
-                const result = deserialize(P);
+                const P = buildMessage(error);
+                const result = decodeMessage(P);
                 assert.equal(result.message, error!.message)
                 assert.equal(result.stack, error!.stack)
             })
@@ -177,8 +177,8 @@ describe("treesync", function() {
                 const { mom, bob, alice } = buildSimpleFamilyTree();
                 //(alice as any).x = alice;
 
-                const bobFlattened = serialize(bob);
-                const bob2 = deserialize(bobFlattened);
+                const bobFlattened = buildMessage(bob);
+                const bob2 = decodeMessage(bobFlattened);
 
                 assert.notEqual(bob2, bob);
                 assert.equal(bob2.age, bob.age);
@@ -253,17 +253,17 @@ describe("treesync", function() {
             const original = { a: "1" };
 
             const sender = new Synchronizer();
-            const payload1 = sender.write(original);
+            const payload1 = sender.buildPacket(original);
 
             const receiver = new Synchronizer();
-            const result = receiver.recv(payload1);
+            const result = receiver.decodePacket(payload1);
 
             assert.notStrictEqual(original, result);
             assert.deepEqual(result, original);
 
             original.a = "2";
-            const payload2 = sender.write(original);
-            const result2 = receiver.recv(payload2);
+            const payload2 = sender.buildPacket(original);
+            const result2 = receiver.decodePacket(payload2);
 
             assert.deepEqual(result2, original);
 
@@ -275,10 +275,10 @@ describe("treesync", function() {
 
             // synchronize mom
             const sender = new Synchronizer();
-            const payload1 = sender.write(mom);
+            const payload1 = sender.buildPacket(mom);
 
             const receiver = new Synchronizer();
-            const mom1 = receiver.recv(payload1);
+            const mom1 = receiver.decodePacket(payload1);
             // console.log("R", payload1);
 
             assert.notStrictEqual(mom, mom1);
@@ -286,8 +286,8 @@ describe("treesync", function() {
 
             // synchonize bob (should be noop)
             bob.likes = "orange";
-            const payload2 = sender.write(bob);
-            const bob1 = receiver.recv(payload2);
+            const payload2 = sender.buildPacket(bob);
+            const bob1 = receiver.decodePacket(payload2);
 
             assert.deepEqual(bob, bob1);
             // TODO: asserts

@@ -299,7 +299,7 @@ export function serializeValue(object: any, context: SerializationContext): Tran
     return isLeaf(object) ? doSerializeLeaf(object) : serializeShareableObject(object, context);
 }
 
-export function serialize(object: any, context?: SerializationContext): SerializationMessage {
+export function buildMessage(object: any, context?: SerializationContext): SerializationMessage {
     if (context === undefined) {
         context = new SerializationContext();
     }
@@ -307,6 +307,10 @@ export function serialize(object: any, context?: SerializationContext): Serializ
     context.message.root = serializeValue(object, context);
     context.generation++;
     return context.message;
+}
+
+export function serialize(object: any, context?: SerializationContext): string {
+    return JSON.stringify(buildMessage(object, context));
 }
 
 export function deserializeRef(object: TransportObject, context: SerializationContext) {
@@ -362,7 +366,7 @@ export function deserializeValue(object: TransportValue, context: SerializationC
     }
 }
 
-export function deserialize(message: SerializationMessage, context?: SerializationContext) {
+export function decodeMessage(message: SerializationMessage, context?: SerializationContext) {
     if (context === undefined) {
         context = new SerializationContext();
     }
@@ -372,17 +376,21 @@ export function deserialize(message: SerializationMessage, context?: Serializati
     return root;
 }
 
+export function deserialize(payload: string, context?: SerializationContext): string {
+    return decodeMessage(JSON.parse(payload), context);
+}
+
+
 export type SyncPayload = string;
 
 export class Synchronizer {
     serializationContext = new SerializationContext();
 
-    write(object: any): SyncPayload {
-        return JSON.stringify(serialize(object, this.serializationContext));
+    buildPacket(object: any): SyncPayload {
+        return serialize(object, this.serializationContext);
     }
 
-    recv(payload: SyncPayload): any {
-        const message = JSON.parse(payload);
-        return deserialize(message, this.serializationContext);
+    decodePacket(payload: SyncPayload): any {
+        return deserialize(payload, this.serializationContext);
     }
 }
