@@ -1,10 +1,10 @@
 {
   "name": "@zbigg/treesync",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Synchronize whole object trees just like JSON.",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/zbigg/treesync.git"
+    "type": "git",
+    "url": "https://github.com/zbigg/treesync.git"
   },
   "main": "lib/treesync.js",
   "scripts": {
