@@ -1,4 +1,6 @@
-# TreeSync
+treesync
+========
+[![npm](https://img.shields.io/npm/v/@zbigg/treesync.svg?style=flat-square)](http://www.npmjs.com/package/@zbigg/treesync)
 
 Synchronize whole object trees just like JSON.
 
