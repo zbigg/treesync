@@ -22,7 +22,6 @@ Synchronize whole object trees just like JSON.
 
 ```
 $ npm install @zbigg/treesync
-
 ```
 Typescript typings included.
 
@@ -75,7 +74,7 @@ function receiver() {
         if (oldGraph !== undefined) {
             assert(graph === oldGraph)
         }
-        oldGrapg = graph;
+        oldGraph = graph;
     }
 }
 

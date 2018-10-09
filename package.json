@@ -4,7 +4,8 @@
   "description": "Synchronize whole object trees just like JSON.",
   "keywords": [
     "javascript",
-    "serialization"
+    "serialization",
+    "synchronization"
   ],
   "repository": {
     "type": "git",
@@ -13,7 +14,8 @@
   "main": "lib/treesync.js",
   "scripts": {
     "prepare": "tsc",
-    "test": "mocha -r ts-node/register test/**/*.spec.ts"
+    "test": "mocha -r ts-node/register test/**/*.spec.ts",
+    "clean": "rm -f lib/treesync.{js,d.ts}"
   },
   "author": "",
   "license": "MIT",
