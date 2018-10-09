@@ -205,6 +205,8 @@ describe("treesync", function() {
                 private m_foo: string;
 
                 notTransfered?: string;
+                mapped?: string;
+                mapped2?: string;
 
                 constructor(foo?: string) {
                     this.m_foo = foo || "defoo";
@@ -226,23 +228,40 @@ describe("treesync", function() {
                 assert.equal(result.foo, original.foo);
             });
 
-            it("serializes custom class with property filters", function() {
+            it("serializes custom class with property filters and mappers", function() {
                 const context = new SerializationContext();
                 context.addClass({
                     name: "custom",
                     constructor: Custom,
                     propertyFilter: (name: string) => {
                         return name !== "notTransfered";
+                    },
+                    propertyMapSerialize: (name: string, value: any) => {
+                        if (name === "mapped" && typeof value === 'string') {
+                            return value.toUpperCase();
+                        }
+                        return value;
+                    },
+                    propertyMapDeserialize: (name: string, value: any) => {
+                        if (name === "mapped2" && typeof value === 'string') {
+                            return value.toLowerCase();
+                        }
+                        return value;
                     }
                 });
 
                 const original = new Custom("xxx");
                 original.notTransfered = "no!";
+                original.mapped = "abc";
+                original.mapped2 = "XyZ";
                 const result = transfer(original, context);
 
                 assert.instanceOf(result, Custom);
                 assert.notStrictEqual(result, original);
                 assert.strictEqual(result.foo, original.foo);
+                assert.strictEqual(result.mapped, original.mapped.toUpperCase());
+
+                assert.strictEqual(result.mapped2, original.mapped2.toLowerCase());
                 assert.notProperty(result, "notTransfered");
             });
         });

@@ -4,7 +4,7 @@ interface TransportObject {
     value?: TransportValue | { [name: string]: TransportValue } | TransportValue[];
 }
 
-type TransportValue = number | string | boolean | null | TransportObject;
+export type TransportValue = number | string | boolean | null | TransportObject;
 
 interface ObjectState {
     id: string;
@@ -14,12 +14,15 @@ interface ObjectState {
 }
 
 export type PropertyFilter = (name: string) => boolean;
+export type PropertyMapper = (name: string, value: any) => any;
 
 export interface ClassDef {
     name: string;
     constructor: new () => any;
     factory?: () => any;
     propertyFilter?: PropertyFilter;
+    propertyMapSerialize?: PropertyMapper;
+    propertyMapDeserialize?: PropertyMapper;
 }
 
 export interface SerializationMessage {
@@ -83,11 +86,20 @@ function doSerializeLeaf(object: Leaf): TransportValue {
     }
 }
 
-function serializeProps(object: any, propertyFilter: PropertyFilter | undefined, context: SerializationContext) {
+function serializeProps(object: any, classDef: ClassDef | undefined, context: SerializationContext) {
     const result: { [name: string]: TransportValue } = {};
+    const propertyFilter = classDef && classDef.propertyFilter;
+    const propertyMap = classDef && classDef.propertyMapSerialize;
     for (const prop in object) {
-        if (object.hasOwnProperty(prop) && (!propertyFilter || propertyFilter(prop))) {
-            result[prop] = serializeValue((object as any)[prop], context);
+        if (object.hasOwnProperty(prop)) {
+            if (propertyFilter && !propertyFilter(prop)) {
+                continue;
+            }
+            let value = (object as any)[prop];
+            if (propertyMap) {
+                value = propertyMap(prop, value);
+            }
+            result[prop] = serializeValue(value, context);
         }
     }
     return result;
@@ -108,9 +120,8 @@ function doSerializeObject(object: object, context: SerializationContext): Trans
     } else {
         const constructor = object.constructor;
         const classDef = context.customClassByConstructor && context.customClassByConstructor.get(constructor);
-        const propertyFilter = classDef && classDef.propertyFilter;
         if (classDef) {
-            return { type: classDef.name, value: serializeProps(object, propertyFilter, context) };
+            return { type: classDef.name, value: serializeProps(object, classDef, context) };
         } else if (constructor === Date) {
             return { type: "date", value: (object as Date).getTime() };
         } else if (constructor === RegExp) {
@@ -131,7 +142,7 @@ function doSerializeObject(object: object, context: SerializationContext): Trans
             //     value: "TBD"
             // }
         } else {
-            return { type: "object", value: serializeProps(object, propertyFilter, context) };
+            return { type: "object", value: serializeProps(object, classDef, context) };
         }
     }
 }
@@ -166,8 +177,8 @@ function doCreateInstance(object: TransportObject, context: SerializationContext
                 const factory = classDef.factory;
                 return factory();
             } else if (classDef.constructor) {
-                const proto = classDef.constructor;
-                return new proto();
+                const constructor = classDef.constructor;
+                return new constructor();
             } else {
                 throw new Error(
                     `doDeserializeObject: class '${object.type}' has neither factory or constructor defined`
@@ -188,17 +199,25 @@ function doFillInstanceChildren(instance: any, object: TransportObject, context:
         }
         const srcArray = object.value as TransportValue[];
         instance.length = srcArray.length;
+
         srcArray.forEach((item, i) => {
             instance[i] = deserializeValue(item, context);
         });
     } else {
         if (object.value) {
+            const classDef =
+                context.customClassByConstructor && context.customClassByConstructor.get(instance.constructor);
+            const propertyMap = classDef && classDef.propertyMapDeserialize;
             for (const prop in object.value as {}) {
                 const propValue = (object.value as any)[prop];
                 if (propValue !== null && propValue !== undefined && propValue.type === "delete-prop") {
                     delete instance[prop];
                 } else {
-                    instance[prop] = deserializeValue(propValue, context);
+                    let value = deserializeValue(propValue, context);
+                    if (propertyMap) {
+                        value = propertyMap(prop, value);
+                    }
+                    instance[prop] = value;
                 }
             }
         }
@@ -376,10 +395,9 @@ export function decodeMessage(message: SerializationMessage, context?: Serializa
     return root;
 }
 
-export function deserialize(payload: string, context?: SerializationContext): string {
+export function deserialize(payload: string, context?: SerializationContext): any {
     return decodeMessage(JSON.parse(payload), context);
 }
-
 
 export type SyncPayload = string;
 
