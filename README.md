@@ -30,19 +30,31 @@ Typescript typings included.
 Basic sending/receiving
 
 ```javascript
-import * as treesync from '@zbigg/treesync'
+var treesync = require("@zbigg/treesync")
+var EventEmitter = require('events')
 
+const channel = new EventEmitter();
 function sender() {
-    var someGraph = { ... };
-    someChannel.write(treesync.serialize(someGraph))
+    var someGraph = { iteration: 2, numbers: [] };
+    const id = setInterval(function() {
+        someGraph.iteration++;
+        someGraph.numbers.push(someGraph.iteration % 3);
+        channel.emit("data", treesync.serialize(someGraph));
+        
+        if (someGraph.iteration === 10) {
+            clearInterval(id);
+        }
+    }, 1);
 }
-
 function receiver() {
-    someChannel.read.on('data', data => {
-        console.log(treesync.deserialize(someGraph));
-    }
+    channel.on('data', data => {
+        const g = treesync.deserialize(data)
+        console.log(`received ${g.iteration} ${g.numbers}`);
+    });
 }
 
+sender();
+receiver();
 ```
 
 Continuous sending/receiving.
