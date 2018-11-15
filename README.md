@@ -1,6 +1,8 @@
 treesync
 ========
 [![npm](https://img.shields.io/npm/v/@zbigg/treesync.svg?style=flat-square)](http://www.npmjs.com/package/@zbigg/treesync)
+[![Build status](https://travis-ci.org/zbigg/treesync.svg)](https://travis-ci.org/zbigg/treesync)
+
 
 Synchronize whole object trees just like JSON.
 
@@ -40,7 +42,7 @@ function sender() {
         someGraph.iteration++;
         someGraph.numbers.push(someGraph.iteration % 3);
         channel.emit("data", treesync.serialize(someGraph));
-        
+
         if (someGraph.iteration === 10) {
             clearInterval(id);
         }
