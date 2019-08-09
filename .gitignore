@@ -4,3 +4,4 @@ node_modules/
 zbigg-treesync*.tgz
 coverage
 .nyc_output/
+lib/*.js.map
