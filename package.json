@@ -15,6 +15,7 @@
   "scripts": {
     "prepare": "tsc",
     "test": "nyc mocha -r ts-node/register test/**/*.spec.ts",
+    "posttest": "nyc report --reporter=json",
     "clean": "rm -f lib/treesync.{js,d.ts}"
   },
   "author": "Zbigniew Zagórski <z.zagorski@gmail.com>",
