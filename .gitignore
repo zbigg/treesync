@@ -1,7 +1,7 @@
-lib/*.js
-lib/*.d.ts
 node_modules/
+*.js
+*.d.ts
+*.js.map
 zbigg-treesync*.tgz
-coverage
+coverage/
 .nyc_output/
-lib/*.js.map
