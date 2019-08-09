@@ -14,7 +14,7 @@
   "main": "lib/treesync.js",
   "scripts": {
     "prepare": "tsc",
-    "test": "mocha -r ts-node/register test/**/*.spec.ts",
+    "test": "nyc mocha -r ts-node/register test/**/*.spec.ts",
     "clean": "rm -f lib/treesync.{js,d.ts}"
   },
   "author": "Zbigniew Zagórski <z.zagorski@gmail.com>",
