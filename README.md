@@ -2,7 +2,7 @@ treesync
 ========
 [![npm](https://img.shields.io/npm/v/@zbigg/treesync.svg?style=flat-square)](http://www.npmjs.com/package/@zbigg/treesync)
 [![Build status](https://travis-ci.org/zbigg/treesync.svg)](https://travis-ci.org/zbigg/treesync)
-
+[![codecov](https://codecov.io/gh/zbigg/treesync/branch/master/graph/badge.svg)](https://codecov.io/gh/zbigg/treesync)
 
 Synchronize whole object trees just like JSON.
 
